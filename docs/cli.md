@@ -186,6 +186,11 @@ zotero-cli plugin
 zotero-cli plugin --path
 zotero-cli plugin --reveal
 
+# Zotero's own "Find Full Text", run by the Zotero app (needs the bridge add-on)
+zotero-cli bridge --reveal              # build zotero-mcp-bridge.xpi, then install it in Zotero
+zotero-cli find-full-text ABC12345 DEF67890
+zotero-cli find-full-text ABC12345 --no-wait
+
 # Bulk edits across many items
 zotero-cli batch --item-keys ABC123,DEF456 --add-tags screened
 zotero-cli batch --query "machine learning" --add-tags survey --limit 100

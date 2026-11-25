@@ -1,0 +1,15 @@
+{
+  "manifest_version": 2,
+  "name": "zotero-mcp bridge",
+  "version": "1.0.0",
+  "description": "Lets zotero-mcp on this computer run Zotero actions, such as Find Full Text, in the Zotero app.",
+  "homepage_url": "https://github.com/54yyyu/zotero-mcp",
+  "applications": {
+    "zotero": {
+      "id": "bridge@zotero-mcp",
+      "update_url": "https://raw.githubusercontent.com/54yyyu/zotero-mcp/main/src/zotero_mcp/zotero_bridge/updates.json",
+      "strict_min_version": "7.0",
+      "strict_max_version": "*"
+    }
+  }
+}

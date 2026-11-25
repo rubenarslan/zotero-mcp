@@ -128,6 +128,10 @@ TOOLSETS: dict[str, frozenset[str]] = {
     # is transport-scoped rather than listed in DEFAULT_ON; see
     # :func:`resolve_enabled`.
     "chatgpt-connector": frozenset({"search", "fetch"}),
+    # Commands run inside the Zotero app (the item menu's Find Full Text),
+    # through the zotero-mcp bridge add-on (`zotero-cli bridge`). Off by
+    # default: it needs that add-on and Zotero running on the same computer.
+    "zotero-app": frozenset({"zotero_find_full_text"}),
     # Old names of tools merged in 0.16, kept for one minor so configs and
     # prompts that name them keep working. Off unless named explicitly (not
     # even `all` includes it: the merged tools already cover every call).

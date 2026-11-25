@@ -37,6 +37,7 @@ group name is an error at startup rather than a silent no-op.
 | `libraries-copy` | off | Copy items between libraries (`zotero_copy_items_between_libraries`) — separate from `libraries` since most multi-library users never call it |
 | `search-admin` | **on** | Build and inspect the semantic search index (needs the `[semantic]` extra) |
 | `pdf-geometry` | **on** | Page layout and PDF outline — pairs with area annotations |
+| `zotero-app` | off | `zotero_find_full_text`: runs Zotero's own "Find Full Text" in the Zotero app. Needs Zotero running on the same computer with the [zotero-mcp bridge add-on](#zotero-app-actions) |
 | `chatgpt-connector` | auto | The `search`/`fetch` pair required by ChatGPT deep research |
 | `legacy` | off | Pre-0.16 names of merged tools: `zotero_search_by_tag`, `zotero_create_collection`, `zotero_update_collection`, `zotero_delete_collection`. Removed in 0.17 |
 
@@ -161,6 +162,49 @@ No Scite account is required; these use public API endpoints.
 - `zotero_get_item_related`: Get all related items for a specific Zotero item
 - `zotero_add_item_relation`: Add a related item relationship (creates bidirectional link)
 - `zotero_remove_item_relation`: Remove a related item relationship
+
+### 🖥 Zotero app (`zotero-app`)
+- `zotero_find_full_text`: Run Zotero's "Find Full Text" (item menu) on up to 100 items, and report per item the PDF or EPUB it attached, or why there was none
+
+<a id="zotero-app-actions"></a>
+
+## Zotero app actions
+
+Some commands exist only inside the Zotero app. "Find Full Text" is one: it
+uses Zotero's own resolvers (DOI, URL, Unpaywall and any you added), your
+library proxy and your browser cookies, which no API can reach. The
+**zotero-mcp bridge** is a small Zotero add-on with no window or menu of its
+own. It lets zotero-mcp and `zotero-cli` ask the running Zotero to run such
+commands.
+
+1. Run `zotero-cli bridge --reveal`. It writes `zotero-mcp-bridge.xpi` to
+   `~/.config/zotero-mcp/` and shows it in your file manager.
+2. In Zotero, choose Tools > Plugins, click the gear, choose Install Plugin
+   From File, and pick that file. No restart is needed.
+3. Check that "Allow other applications on this computer to communicate with
+   Zotero" is on in Zotero's Settings > Advanced. The bridge refuses to act
+   without it.
+4. For the MCP server, add the group: `"ZOTERO_MCP_TOOLSETS": "default,zotero-app"`.
+   `zotero-cli find-full-text` works without this step.
+
+Run `zotero-cli bridge` again at any time. It says whether the bridge is
+installed and which version. After upgrading zotero-mcp, install the new file
+over the old one if the version has changed.
+
+`zotero_find_full_text` behaves like the menu command:
+
+- It opens Zotero's progress window and paces requests to each site.
+- It skips items that already have a PDF or EPUB, and items with no DOI, URL
+  or PMCID. The result says which items were skipped and why.
+- It waits up to `timeout` seconds (at most 50 over MCP, 120 by default in the
+  CLI) and then reports what it found so far. Zotero keeps searching after
+  that, and `zotero_get_item_children` shows the files that arrive later.
+- It works on the library chosen with `zotero_switch_library`.
+- In web mode, new files reach the web library once Zotero syncs.
+
+Only programs on your own computer can reach the bridge, and only while that
+Zotero setting is on. Zotero's local server listens on 127.0.0.1, and it drops
+requests that come from a web browser.
 
 ## Managing related items
 

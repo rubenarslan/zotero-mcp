@@ -11,6 +11,7 @@ from zotero_mcp.tools import (  # noqa: F401
     search,
     synthesis,
     write,
+    zotero_app,
 )
 
 # Optional: Scite enrichment (requires ``pip install zotero-mcp-server[scite]``)

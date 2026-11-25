@@ -1627,6 +1627,55 @@ def cmd_plugin(args):
         "Setup and first run: https://github.com/54yyyu/zotero-mcp/blob/main/docs/chat-plugin.md"))
 
 
+def cmd_bridge(args):
+    """Build the zotero-mcp bridge add-on (.xpi), say how to install it, and whether it is."""
+    from zotero_mcp import zotero_bridge
+    xpi = zotero_bridge.build_xpi()
+    if args.path:
+        _out(args, "bridge", data={"path": str(xpi)}, text=str(xpi))
+        return
+    if args.reveal:
+        _reveal(xpi)
+    version = zotero_bridge.addon_version()
+    try:
+        info = zotero_bridge.ping()
+        installed = info.get("version") or "unknown"
+        status = f"Installed in the running Zotero: version {installed}."
+        if installed != version:
+            status += f" Install the file above to update it to {version}."
+        if not info.get("allowed"):
+            status += (" It will refuse actions until you turn on \"Allow other applications on this "
+                       "computer to communicate with Zotero\" in Zotero's Settings > Advanced.")
+    except zotero_bridge.BridgeError as e:
+        installed = None
+        status = ("Not installed in the running Zotero yet." if e.kind == "bridge_missing"
+                  else f"Could not check whether it is installed: {e}")
+    _out(args, "bridge", data={"path": str(xpi), "version": version, "installed": installed}, text=(
+        f"zotero-mcp bridge {version}: {xpi}\n"
+        "Install it in Zotero: Tools > Plugins, click the gear, Install Plugin From File, "
+        "and choose that file. No restart needed.\n"
+        "It lets zotero-mcp run Zotero's own commands, such as Find Full Text "
+        "(`zotero-cli find-full-text`, or the zotero_find_full_text tool).\n"
+        f"{status}"))
+
+
+def cmd_find_full_text(args):
+    """Run Zotero's Find Full Text on items, through the bridge add-on."""
+    setup_zotero_environment()
+    from zotero_mcp import zotero_bridge
+    from zotero_mcp.tools import zotero_app
+    wait = 0 if args.no_wait else max(0, min(args.timeout, 600))
+    try:
+        body = zotero_app.find_full_text_results(args.item_keys, wait)
+    except ValueError as e:
+        _fail(args, "find-full-text", str(e), "bad_input")
+    except zotero_bridge.BridgeError as e:
+        _fail(args, "find-full-text", str(e), e.kind)
+    _out(args, "find-full-text", data={"finished": body.get("finished", False),
+                                       "results": body.get("results", [])},
+         text=zotero_app.format_find_full_text(body))
+
+
 def _reader_url(attachment_key: str, *, page: int | None = None,
                 annotation_key: str | None = None) -> str:
     """A zotero://open-pdf link that Zotero's own protocol handler resolves.
@@ -2168,6 +2217,21 @@ def build_parser() -> argparse.ArgumentParser:
     pl_p.add_argument("--path", action="store_true", help="Print only the path to the .xpi")
     pl_p.add_argument("--reveal", action="store_true", help="Also show the .xpi in the file manager")
 
+    # bridge -- the add-on that lets zotero-mcp run commands in the Zotero app
+    br_p = sub.add_parser("bridge", help="Build the zotero-mcp bridge add-on (.xpi), which lets "
+                                         "zotero-cli run Zotero commands such as Find Full Text")
+    br_p.add_argument("--path", action="store_true", help="Print only the path to the .xpi")
+    br_p.add_argument("--reveal", action="store_true", help="Also show the .xpi in the file manager")
+
+    # find-full-text -- the item menu's "Find Full Text", run by the Zotero app
+    fft_p = sub.add_parser("find-full-text", help="Have the Zotero app find and attach PDFs/EPUBs "
+                                                  "for items (needs the bridge add-on)")
+    fft_p.add_argument("item_keys", nargs="+", help="Parent item keys (at most 100; commas also work)")
+    fft_p.add_argument("--timeout", type=int, default=120,
+                       help="Seconds to wait for Zotero to finish before reporting (default 120, at most 600)")
+    fft_p.add_argument("--no-wait", action="store_true",
+                       help="Only queue the items; Zotero keeps working and shows its progress")
+
     # open -- point the Zotero reader at a page or an annotation
     op_p = sub.add_parser("open", help="Open an item's PDF in the Zotero reader at a page or annotation")
     op_p.add_argument("item_key", nargs="?", help="Item or attachment key (not needed with --annotation)")
@@ -2216,6 +2280,8 @@ _CMD_MAP = {
     "synthesize": cmd_synthesize,
     "path": cmd_path,
     "plugin": cmd_plugin,
+    "bridge": cmd_bridge,
+    "find-full-text": cmd_find_full_text,
     "open": cmd_open,
     "batch": cmd_batch,
 }
@@ -2252,6 +2318,9 @@ Commands returning structured data
   notes list            data.notes[] -- with both .text and .html
   config                data.settings
   plugin                data.path
+  bridge                data.path, data.version, data.installed (null if not)
+  find-full-text        data.finished, data.results[] (key, status, title,
+                        reason, attachment {key, contentType, title})
 
 Every other command returns {"text": "<the markdown it would have
 printed>"}. That is deliberate: those commands' answers really are status

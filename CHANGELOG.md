@@ -5,6 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+
+- **Run Zotero's "Find Full Text" from the MCP server and the CLI.**
+  - `zotero_find_full_text` (opt-in toolset `zotero-app`) and `zotero-cli find-full-text KEY...` ask the running Zotero app to run the item menu's Find Full Text. Zotero then uses its own resolvers, the user's proxy and their cookies.
+  - The result lists, per item, the PDF or EPUB attached (with its key), "no file found", "still searching" when the wait ran out, or why the item was skipped.
+  - This needs the new **zotero-mcp bridge**: a small Zotero add-on with no UI that ships inside the package. `zotero-cli bridge` builds its `.xpi` and says whether it is installed.
+  - The bridge adds `/zotero-mcp/ping` and `/zotero-mcp/action` to Zotero's local server. It runs actions only while "Allow other applications on this computer to communicate with Zotero" is on, and Zotero's server already refuses requests from web pages.
+  - The "all" profile's tool surface grows by 185 tokens; the default profile is unchanged. See [Zotero app actions](docs/tools.md#zotero-app-actions).
+
 ## [0.17.4] - 2026-11-24
 
 ### Added

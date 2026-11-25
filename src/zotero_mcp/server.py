@@ -142,7 +142,7 @@ from zotero_mcp.tools.write import (  # noqa: F401
     search_collections,
     update_item,
 )
-
+from zotero_mcp.tools.zotero_app import find_full_text  # noqa: F401
 from zotero_mcp.toolsets import apply_toolsets
 from zotero_mcp.utils import (  # noqa: F401
     clean_html,

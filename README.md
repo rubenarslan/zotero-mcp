@@ -160,7 +160,7 @@ An MCP server sends every tool's schema on every request, before you type anythi
 | Route | In context | Paid |
 |---|---:|---|
 | MCP server, default profile (38 tools) | **7,752** | every request |
-| MCP server, all tools (51) | 10,971 | every request |
+| MCP server, all tools (52) | 11,156 | every request |
 | Agent skill, frontmatter only | **98** | always |
 | Agent skill, body loaded | 2,755 | when it fires |
 | Agent skill + full command reference | 7,944 | only if the agent opens it |

@@ -121,7 +121,9 @@ class TestReportShape:
 SURFACE_CEILINGS = {
     "(unset - default)": 7_900,
     "none": 6_750,
-    "all": 11_150,
+    # 11,150 until the opt-in zotero-app toolset (zotero_find_full_text, ~185
+    # tokens). Only "all" pays for it; the default profile does not change.
+    "all": 11_350,
 }
 
 

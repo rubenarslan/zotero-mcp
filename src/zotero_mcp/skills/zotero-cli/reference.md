@@ -436,6 +436,17 @@ but not follow a sub-command: `get --json metadata KEY` parses and
 
  - `<item_key>`
 
+## `bridge`
+
+ - `--path` -- Print only the path to the .xpi
+ - `--reveal` -- Also show the .xpi in the file manager
+
+## `find-full-text`
+
+ - `<item_keys>` -- Parent item keys (at most 100; commas also work)
+ - `--timeout` -- default `120` -- Seconds to wait for Zotero to finish before reporting (default 120, at most 600)
+ - `--no-wait` -- Only queue the items; Zotero keeps working and shows its progress
+
 ## `open`
 
  - `<item_key>` -- Item or attachment key (not needed with --annotation)
